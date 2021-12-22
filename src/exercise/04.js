@@ -39,14 +39,14 @@ function Board({onClick, squares}) {
   )
 }
 
-function BoardHistory({history}) {
+function BoardHistory({history, currentStep, setCurrentStep}) {
   return history.map((stepSquares, step) => {
     const description = step === 0 ? 'Go to start of game' : `Go to snapshot #${step}`
-    const isCurrentStep = step === history.length - 1
+    const isCurrentStep = step === currentStep
 
     return (
       <li key={step}>
-        <button disabled={isCurrentStep}>
+        <button disabled={isCurrentStep} onClick={() => setCurrentStep(step)}>
           {description}
           {isCurrentStep ? ' [current]' : ''}
         </button>
@@ -57,8 +57,9 @@ function BoardHistory({history}) {
 
 function Game() {
   const [squares, setSquares] = useLocalStorageState('tic-tac-toe', getEmptyBoard())
+  const [currentStep, setCurrentStep] = useLocalStorageState('tic-tac-tie', 0)
 
-  const boardHistory = [squares]
+  const boardHistory = [[], squares, []]
 
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
@@ -89,7 +90,7 @@ function Game() {
       <div className="game-info">
         <div>{status}</div>
         <ol>
-          <BoardHistory history={boardHistory} />
+          <BoardHistory history={boardHistory} currentStep={currentStep} setCurrentStep={setCurrentStep}/>
         </ol>
       </div>
     </div>
