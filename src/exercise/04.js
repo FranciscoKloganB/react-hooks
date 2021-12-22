@@ -39,22 +39,11 @@ function Board({onClick, squares}) {
   )
 }
 
-function Game() {
-  const [squares, setSquares] = useLocalStorageState(
-    'tic-tac-toe',
-    getEmptyBoard(),
-  )
-  const currentStep = 0
-  const nextValue = calculateNextValue(squares)
-  const winner = calculateWinner(squares)
-  const status = calculateStatus(winner, squares, nextValue)
-  const history = [squares]
+function BoardHistory({history}) {
+  return history.map((stepSquares, step) => {
+    const description = step === 0 ? 'Go to start of game' : `Go to snapshot #${step}`
+    const isCurrentStep = step === history.length - 1
 
-  const moves = history.map((stepSquares, step) => {
-    const isCurrentStep = step === currentStep
-    const description =
-      step === 0 ? 'Go to start of game' : `Go to game state #${step}`
-      
     return (
       <li key={step}>
         <button disabled={isCurrentStep}>
@@ -64,6 +53,16 @@ function Game() {
       </li>
     )
   })
+}
+
+function Game() {
+  const [squares, setSquares] = useLocalStorageState('tic-tac-toe', getEmptyBoard())
+
+  const boardHistory = [squares]
+
+  const nextValue = calculateNextValue(squares)
+  const winner = calculateWinner(squares)
+  const status = calculateStatus(winner, squares, nextValue)
 
   const selectSquare = square => {
     if (winner || squares[square]) {
@@ -89,7 +88,9 @@ function Game() {
       </div>
       <div className="game-info">
         <div>{status}</div>
-        <ol>{moves}</ol>
+        <ol>
+          <BoardHistory history={boardHistory} />
+        </ol>
       </div>
     </div>
   )
