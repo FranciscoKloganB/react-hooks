@@ -3,19 +3,14 @@
 
 import * as React from 'react'
 
+import { useLocalStorageState } from './hooks/useLocalStorageState'
+
 const getEmptyBoard = () => Array(9).fill(null)
 
-// 1. 💯 preserve state in localStorage
+// 2. 💯 useLocalStorageState
 function Board() {
   // 🐨 squares is the state for this component. Add useState for squares
-  const [squares, setSquares] = React.useState(() =>
-    JSON.parse(window.localStorage.getItem('tic-tac-toe')) || getEmptyBoard(),
-  )
-
-  React.useEffect(() => {
-    // Update the document title using the browser API
-    window.localStorage.setItem('tic-tac-toe', JSON.stringify(squares))
-  }, [squares])
+  const [squares, setSquares] = useLocalStorageState('tic-tac-toe', getEmptyBoard())
 
   // 🐨 We'll need the following bits of derived state:
   // - nextValue ('X' or 'O')
