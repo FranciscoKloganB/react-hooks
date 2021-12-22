@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 
-import { useLocalStorageState } from './hooks/useLocalStorageState'
+import {useLocalStorageState} from './hooks/useLocalStorageState'
 
 const getEmptyBoard = () => Array(9).fill(null)
 
@@ -44,12 +44,28 @@ function Game() {
     'tic-tac-toe',
     getEmptyBoard(),
   )
-
+  const currentStep = 0
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
   const status = calculateStatus(winner, squares, nextValue)
+  const history = [squares]
 
-  const selectSquare = (square) => {
+  const moves = history.map((stepSquares, step) => {
+    const isCurrentStep = step === currentStep
+    const description =
+      step === 0 ? 'Go to start of game' : `Go to game state #${step}`
+      
+    return (
+      <li key={step}>
+        <button disabled={isCurrentStep}>
+          {description}
+          {isCurrentStep ? ' [current]' : ''}
+        </button>
+      </li>
+    )
+  })
+
+  const selectSquare = square => {
     if (winner || squares[square]) {
       return squares
     }
@@ -58,7 +74,7 @@ function Game() {
     squaresCopy[square] = nextValue
     setSquares(squaresCopy)
   }
-  
+
   function restart() {
     setSquares(getEmptyBoard())
   }
@@ -73,7 +89,7 @@ function Game() {
       </div>
       <div className="game-info">
         <div>{status}</div>
-        {/* <ol>{moves}</ol> */}
+        <ol>{moves}</ol>
       </div>
     </div>
   )
@@ -81,7 +97,9 @@ function Game() {
 
 // eslint-disable-next-line no-unused-vars
 function calculateStatus(winner, squares, nextValue) {
-  const noVictoryStatus = squares.every(Boolean) ? `Scratch: Cat's game` : `Next player: ${nextValue}`
+  const noVictoryStatus = squares.every(Boolean)
+    ? `Scratch: Cat's game`
+    : `Next player: ${nextValue}`
   return winner ? `Winner: ${winner}` : noVictoryStatus
 }
 
