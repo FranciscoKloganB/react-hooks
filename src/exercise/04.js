@@ -5,9 +5,18 @@ import * as React from 'react'
 
 const getEmptyBoard = () => Array(9).fill(null)
 
+// 1. 💯 preserve state in localStorage
 function Board() {
   // 🐨 squares is the state for this component. Add useState for squares
-  const [squares, setSquares] = React.useState(getEmptyBoard())
+  const [squares, setSquares] = React.useState(() =>
+    JSON.parse(window.localStorage.getItem('tic-tac-toe')) || getEmptyBoard(),
+  )
+
+  React.useEffect(() => {
+    // Update the document title using the browser API
+    window.localStorage.setItem('tic-tac-toe', JSON.stringify(squares))
+  }, [squares])
+
   // 🐨 We'll need the following bits of derived state:
   // - nextValue ('X' or 'O')
   // - winner ('X', 'O', or null)
