@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import {useLocalStorageState} from './hooks/useLocalStorageState'
 
-const getEmptyBoard = () => Array(9).fill(null)
+const emptyBoard = Array(9).fill(null)
 
 // 3. 💯 Create a full backward and forward compatible history
 function Board({onClick, squares}) {
@@ -56,33 +56,37 @@ function BoardHistory({history, currentStep, setCurrentStep}) {
 }
 
 function Game() {
-  const [squares, setSquares] = useLocalStorageState('tic-tac-toe', getEmptyBoard())
-  const [currentStep, setCurrentStep] = useLocalStorageState('tic-tac-tie', 0)
+  const [currentStep, setCurrentStep] = useLocalStorageState('tic-tac-toe-current_step', 0)
+  const [history, setHistory] = useLocalStorageState('tic-tac-toe-history', [emptyBoard])
 
-  const boardHistory = [[], squares, []]
+  const currentSquares = history[currentStep]
 
-  const nextValue = calculateNextValue(squares)
-  const winner = calculateWinner(squares)
-  const status = calculateStatus(winner, squares, nextValue)
+  const nextValue = calculateNextValue(currentSquares)
+  const winner = calculateWinner(currentSquares)
+  const status = calculateStatus(winner, currentSquares, nextValue)
 
-  const selectSquare = square => {
-    if (winner || squares[square]) {
-      return squares
+  function selectSquare(square) {
+    if (winner || currentSquares[square]) {
+      return currentSquares
     }
 
-    const squaresCopy = [...squares]
+    const historyCopy = history.slice(0, currentStep + 1)
+    const squaresCopy = [...currentSquares]
     squaresCopy[square] = nextValue
-    setSquares(squaresCopy)
+    
+    setHistory([...historyCopy, squaresCopy])
+    setCurrentStep(historyCopy.length)
   }
 
   function restart() {
-    setSquares(getEmptyBoard())
+    setHistory([emptyBoard])
+    setCurrentStep(0)
   }
 
   return (
     <div className="game">
       <div className="game-board">
-        <Board onClick={selectSquare} squares={squares} />
+        <Board onClick={selectSquare} squares={currentSquares} />
         <button className="restart" onClick={restart}>
           restart
         </button>
@@ -90,7 +94,11 @@ function Game() {
       <div className="game-info">
         <div>{status}</div>
         <ol>
-          <BoardHistory history={boardHistory} currentStep={currentStep} setCurrentStep={setCurrentStep}/>
+          <BoardHistory
+            history={history}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+          />
         </ol>
       </div>
     </div>
