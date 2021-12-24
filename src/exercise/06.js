@@ -9,55 +9,47 @@ import * as React from 'react'
 import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView} from '../pokemon'
 
 function PokemonInfo({pokemonName}) {
+  const [status, setStatus] = React.useState('idle')
   // 🐨 Have state for the pokemon (null)
   const [pokemon, setPokemon] = React.useState(null)
   const [error, setError] = React.useState(null)
 
-  // 🐨 use React.useEffect where the callback should be called whenever the pokemon name changes.
-  // 🐨 before calling `fetchPokemon`, clear the current pokemon state by setting it to null
-  // 💰 Use the `fetchPokemon` function to fetch a pokemon by its name
   React.useEffect(() => {
     if (!pokemonName) {
       return
     }
 
-    // Prevents error from being returned and guarantees "submit a pokemon" message displayed when needed
-    setError(null)
-    setPokemon(null)
+    setStatus('pending')
 
     fetchPokemon(pokemonName)
       .then(pokemonData => {
         setPokemon(pokemonData)
+        setStatus('resolved')
       })
       .catch(e => {
         setError(e.message)
+        setStatus('rejected')
         console.log('Error when fetching pokemon data with GraphQL', e)
       })
   }, [pokemonName])
 
-  // 🐨 return the following things based on the `pokemon` state and `pokemonName` prop:
-  //   1. no pokemonName: 'Submit a pokemon'
-  //   2. pokemonName but no pokemon: <PokemonInfoFallback name={pokemonName} />
-  //   3. pokemon: <PokemonDataView pokemon={pokemon} />
-
-  if (error) {
-    return (
-      <div role="alert">
-        PokedexError: <pre style={{whiteSpace: 'normal'}}>{error}</pre>
-        <img src="/img/pokemon/sad_pikachu.jpg" alt="sad pikachu"></img>
-      </div>
-    )
+  switch (status) {
+    case 'idle':
+      return 'Submit a pokemon'
+    case 'resolved':
+      return <PokemonDataView pokemon={pokemon} />
+    case 'pending':
+      return <PokemonInfoFallback name={pokemonName} />
+    case 'rejected':
+      return (
+        <div role="alert">
+          PokedexError: <pre style={{whiteSpace: 'normal'}}>{error}</pre>
+          <img src="/img/pokemon/sad_pikachu.jpg" alt="sad pikachu"></img>
+        </div>
+      )
+    default:
+      throw Error('Impossible status has been reached.')
   }
-
-  if (!pokemonName) {
-    return 'Submit a pokemon'
-  }
-
-  if (!pokemon) {
-    return <PokemonInfoFallback name={pokemonName} />
-  }
-
-  return <PokemonDataView pokemon={pokemon} />
 }
 
 function App() {
