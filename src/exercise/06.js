@@ -5,27 +5,31 @@ import * as React from 'react'
 import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView} from '../pokemon'
 
 function PokemonInfo({pokemonName}) {
-  const [status, setStatus] = React.useState('idle')
-  const [pokemon, setPokemon] = React.useState(null)
-  const [error, setError] = React.useState(null)
+  const [state, setState] = React.useState({
+    status: 'idle',
+    pokemon: null,
+    error: null
+  })
+
+  const {status, pokemon, error} = state
 
   React.useEffect(() => {
     if (!pokemonName) {
       return
     }
 
-    setStatus('pending')
+    setState({...state, status: 'pending'})
 
     fetchPokemon(pokemonName)
       .then(pokemonData => {
-        setPokemon(pokemonData)
-        setStatus('resolved')
+        setState({...state, status: 'resolved', pokemon: pokemonData})
       })
       .catch(e => {
-        setError(e.message)
-        setStatus('rejected')
+        setState({...state, status: 'rejected', error: e.message})
         console.log('Error when fetching pokemon data with GraphQL', e)
       })
+    // false positive exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pokemonName])
 
   switch (status) {
