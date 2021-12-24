@@ -3,12 +3,13 @@
 
 import * as React from 'react'
 import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView} from '../pokemon'
+import {ErrorBoundary} from './errors/ErrorBoundary'
 
 function PokemonInfo({pokemonName}) {
   const [state, setState] = React.useState({
     status: 'idle',
     pokemon: null,
-    error: null
+    error: null,
   })
 
   const {status, pokemon, error} = state
@@ -25,7 +26,7 @@ function PokemonInfo({pokemonName}) {
         setState({...state, status: 'resolved', pokemon: pokemonData})
       })
       .catch(e => {
-        setState({...state, status: 'rejected', error: e.message})
+        setState({...state, status: 'rejected', error: e})
         console.log('Error when fetching pokemon data with GraphQL', e)
       })
     // false positive exhaustive-deps
@@ -40,15 +41,22 @@ function PokemonInfo({pokemonName}) {
     case 'pending':
       return <PokemonInfoFallback name={pokemonName} />
     case 'rejected':
-      return (
-        <div role="alert">
-          PokedexError: <pre style={{whiteSpace: 'normal'}}>{error}</pre>
-          <img src="/img/pokemon/sad_pikachu.jpg" alt="sad pikachu"></img>
-        </div>
-      )
+      throw error
     default:
-      throw Error('Impossible status has been reached.')
+      throw new Error('Oops, reached an impossible and erroneous place.')
   }
+}
+
+function ErrorFallback({error}) {
+  return (
+    <>
+      <b>PokedexError:</b>{' '}
+      <pre style={{whiteSpace: 'normal'}}>
+        {error?.message || 'Oops. Something went wrong.'}
+      </pre>
+      <img src="/img/pokemon/sad_pikachu.jpg" alt="sad pikachu"></img>
+    </>
+  )
 }
 
 function App() {
@@ -63,7 +71,9 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <PokemonInfo pokemonName={pokemonName} />
+        </ErrorBoundary>
       </div>
     </div>
   )
