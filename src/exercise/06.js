@@ -41,13 +41,18 @@ function PokemonInfo({pokemonName}) {
   //   3. pokemon: <PokemonDataView pokemon={pokemon} />
 
   if (error) {
-    return error
+    return (
+      <div role="alert">
+        PokedexError: <pre style={{whiteSpace: 'normal'}}>{error}</pre>
+        <img src="/img/pokemon/sad_pikachu.jpg" alt="sad pikachu"></img>
+      </div>
+    )
   }
 
   if (!pokemonName) {
     return 'Submit a pokemon'
   }
-  
+
   if (!pokemon) {
     return <PokemonInfoFallback name={pokemonName} />
   }
