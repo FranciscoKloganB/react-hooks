@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import {PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView} from '../pokemon'
-import {ErrorBoundary} from './errors/ErrorBoundary'
+import {ErrorBoundary} from 'react-error-boundary'
 
 function PokemonInfo({pokemonName}) {
   const [state, setState] = React.useState({
@@ -49,13 +49,13 @@ function PokemonInfo({pokemonName}) {
 
 function ErrorFallback({error}) {
   return (
-    <>
+    <div role="alert">
       <b>PokedexError:</b>{' '}
       <pre style={{whiteSpace: 'normal'}}>
         {error?.message || 'Oops. Something went wrong.'}
       </pre>
       <img src="/img/pokemon/sad_pikachu.jpg" alt="sad pikachu"></img>
-    </>
+    </div>
   )
 }
 
