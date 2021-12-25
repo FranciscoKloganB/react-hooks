@@ -16,6 +16,8 @@ function PokemonInfo({pokemonName}) {
 
   React.useEffect(() => {
     if (!pokemonName) {
+      setState({...state, status: 'idle'})
+
       return
     }
 
@@ -47,7 +49,7 @@ function PokemonInfo({pokemonName}) {
   }
 }
 
-function ErrorFallback({error}) {
+function ErrorFallback({error, resetErrorBoundary}) {
   return (
     <div role="alert">
       <b>PokedexError:</b>{' '}
@@ -55,6 +57,7 @@ function ErrorFallback({error}) {
         {error?.message || 'Oops. Something went wrong.'}
       </pre>
       <img src="/img/pokemon/sad_pikachu.jpg" alt="sad pikachu"></img>
+      <button onClick={resetErrorBoundary}>Try again</button>
     </div>
   )
 }
@@ -71,7 +74,11 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[pokemonName]}>
+        <ErrorBoundary
+          FallbackComponent={ErrorFallback}
+          resetKeys={[pokemonName]}
+          onReset={() => setPokemonName('')}
+        >
           <PokemonInfo pokemonName={pokemonName} />
         </ErrorBoundary>
       </div>
